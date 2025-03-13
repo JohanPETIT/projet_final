@@ -1,0 +1,9 @@
+[package]
+name = "projet_final"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eframe = "0.31.1"
+egui = "0.31.1"
+egui-file-dialog = "0.9.0"
