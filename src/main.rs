@@ -233,17 +233,17 @@ fn create_button(text: &str) -> egui::Button {
     return egui::Button::new(
         egui::RichText::new(text).color(egui::Color32::from_rgb(255, 255, 255)),
     )
-    .fill(Color32::from_rgb(173, 216, 230)) // Bleu clair (RGB)
-    .corner_radius(CornerRadius::same(10)) // Coins arrondis
-    .stroke(Stroke::new(1.0, Color32::from_rgb(100, 149, 237))); // Contour bleu foncé
+    .fill(Color32::from_rgb(173, 216, 230))
+    .corner_radius(CornerRadius::same(10))
+    .stroke(Stroke::new(1.0, Color32::from_rgb(100, 149, 237)));
 }
 
 // Creates a frame in the theme
 fn create_frame() -> egui::Frame {
     return Frame::new()
-        .stroke(Stroke::new(1.5, Color32::WHITE)) // Bordure blanche
-        .fill(Color32::from_rgb(65, 141, 240)) // Fond gris foncé
-        .corner_radius(CornerRadius::same(10)) // Coins arrondis
+        .stroke(Stroke::new(1.0, Color32::WHITE))
+        .fill(Color32::from_rgb(65, 141, 240))
+        .corner_radius(CornerRadius::same(10))
         .inner_margin(egui::Margin::same(1));
 }
 
@@ -366,7 +366,7 @@ impl eframe::App for MyEguiApp {
                                     frame.show(ui, |ui| {
                                         ui.add_sized(
                                             [self.slider_width, self.slider_height],
-                                            egui::Slider::new(&mut self.speed_value, 0.0..=3.0)
+                                            egui::Slider::new(&mut self.speed_value, 0.2..=3.0)
                                                 .text("Speed value")
                                                 .text_color(Color32::WHITE),
                                         );
@@ -464,7 +464,7 @@ impl eframe::App for MyEguiApp {
                                             [self.slider_width, self.slider_height],
                                             egui::Slider::new(
                                                 &mut self.cutoff_value,
-                                                0.0..=10000.0,
+                                                300.0..=10000.0,
                                             )
                                             .text("Cutoff frequency")
                                             .text_color(Color32::WHITE),
