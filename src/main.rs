@@ -1,8 +1,5 @@
 use eframe::egui;
-use egui::{
-    Align, Color32, CornerRadius, DragValue, FontFamily, FontId, Frame, Layout, RichText, Stroke,
-    TextStyle, Vec2,
-};
+use egui::{Color32, CornerRadius, FontFamily, FontId, Frame, RichText, Stroke, TextStyle, Vec2};
 use egui_file_dialog::FileDialog;
 use kira::{
     effect::{
@@ -12,14 +9,14 @@ use kira::{
         reverb::ReverbBuilder,
     },
     sound::static_sound::StaticSoundData,
-    track::{TrackBuilder, TrackPlaybackState},
-    AudioManager, AudioManagerSettings, Decibels, DefaultBackend, Tween, Value,
+    track::TrackBuilder,
+    AudioManager, AudioManagerSettings, DefaultBackend, Tween,
 };
+use std::ffi::OsStr;
 use std::thread::sleep;
 use std::time::Duration;
-use std::{ffi::OsStr, path::Path};
 
-// Runs app with default native options
+/// Runs app with default native options
 fn main() {
     let native_options = eframe::NativeOptions::default();
     eframe::run_native(
@@ -30,7 +27,7 @@ fn main() {
     .expect("Error loading the signal processing toolbox");
 }
 
-// App structure
+/// App structure
 #[derive(Default)]
 struct MyEguiApp {
     file_dialog: FileDialog,
@@ -44,7 +41,7 @@ struct MyEguiApp {
     slider_height: f32,
 }
 
-// Initializing app default values
+/// Initializing app default values
 impl MyEguiApp {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
         Self {
@@ -61,13 +58,13 @@ impl MyEguiApp {
     }
 }
 
-// Audio processing unit
+/// Audio processing unit
 struct SignalProcessor {
     manager: AudioManager,
     sound_data: StaticSoundData,
 }
 
-// Initializing audio processing unit
+/// Initializing audio processing unit
 impl SignalProcessor {
     fn new(path: &str) -> Self {
         Self {
@@ -78,7 +75,7 @@ impl SignalProcessor {
     }
 }
 
-// To play a sound
+/// To play a sound
 fn play_normally(signal_processor: &mut SignalProcessor) {
     let sound_handle = signal_processor
         .manager
@@ -90,28 +87,7 @@ fn play_normally(signal_processor: &mut SignalProcessor) {
     }
 }
 
-/*
-fn play_multiple(signal_processor: &mut SignalProcessor) {
-    let sound_handle = signal_processor
-        .manager
-        .play(signal_processor.sound_data.clone())
-        .expect("Couldn't play sound from file");
-    sleep(Duration::from_millis(1000));
-    let sound_handle2 = signal_processor
-        .manager
-        .play(signal_processor.sound_data.clone())
-        .expect("Couldn't play sound from file");
-    sleep(Duration::from_millis(1000));
-    let sound_handle3 = signal_processor
-        .manager
-        .play(signal_processor.sound_data.clone())
-        .expect("Couldn't play sound from file");
-    while sound_handle3.state() == kira::sound::PlaybackState::Playing {
-        sleep(Duration::from_millis(100)); // Vérifier périodiquement
-    }
-}*/
-
-// Play a sound with gradually changing speed overtime
+/// Play a sound with gradually changing speed overtime
 fn play_changed_speed(signal_processor: &mut SignalProcessor, speed_rate: f64) {
     let mut sound_handle = signal_processor
         .manager
@@ -129,7 +105,7 @@ fn play_changed_speed(signal_processor: &mut SignalProcessor, speed_rate: f64) {
     }
 }
 
-// Play a sound with a low/high pass filter
+/// Play a sound with a low/high pass filter
 fn play_with_pass(signal_processor: &mut SignalProcessor, mode: FilterMode) {
     let mut track = signal_processor
         .manager
@@ -147,7 +123,7 @@ fn play_with_pass(signal_processor: &mut SignalProcessor, mode: FilterMode) {
     }
 }
 
-// Play a sound with reverberation. 0 is not reverberated and 1 is infinite reverberation
+/// Play a sound with reverberation. 0 is not reverberated and 1 is infinite reverberation
 fn play_with_reverb(signal_processor: &mut SignalProcessor, reverb: f64) {
     let mut track = signal_processor
         .manager
@@ -165,7 +141,7 @@ fn play_with_reverb(signal_processor: &mut SignalProcessor, reverb: f64) {
     }
 }
 
-// Play distorted sound
+/// Play distorted sound
 fn play_with_distortion(signal_processor: &mut SignalProcessor, mode: DistortionKind) {
     let mut distortion_maker = DistortionBuilder::new().kind(mode);
     distortion_maker = distortion_maker.drive(15.0); // Distortion intensity
@@ -186,7 +162,7 @@ fn play_with_distortion(signal_processor: &mut SignalProcessor, mode: Distortion
     }
 }
 
-// Replay sound after every duration delay sound has passed
+/// Replay sound after every duration delay sound has passed
 fn play_with_delay(signal_processor: &mut SignalProcessor, duration: Duration) {
     let mut delay_maker = DelayBuilder::new().delay_time(duration);
     delay_maker = delay_maker.feedback(2.0); // Amount of feedback
@@ -207,7 +183,7 @@ fn play_with_delay(signal_processor: &mut SignalProcessor, duration: Duration) {
     }
 }
 
-// Cuts frequencies below the cutoff frequency
+/// Cuts frequencies below the cutoff frequency
 fn play_with_cutoff(signal_processor: &mut SignalProcessor, cutoff: f64) {
     let mut cutoff_maker = FilterBuilder::new().cutoff(cutoff);
     cutoff_maker = cutoff_maker.mode(FilterMode::LowPass);
@@ -228,7 +204,7 @@ fn play_with_cutoff(signal_processor: &mut SignalProcessor, cutoff: f64) {
     }
 }
 
-// Creates a button in the theme
+/// Creates a button in the theme
 fn create_button(text: &str) -> egui::Button {
     return egui::Button::new(
         egui::RichText::new(text).color(egui::Color32::from_rgb(255, 255, 255)),
@@ -238,7 +214,7 @@ fn create_button(text: &str) -> egui::Button {
     .stroke(Stroke::new(1.0, Color32::from_rgb(100, 149, 237)));
 }
 
-// Creates a frame in the theme
+/// Creates a frame in the theme
 fn create_frame() -> egui::Frame {
     return Frame::new()
         .stroke(Stroke::new(1.0, Color32::WHITE))
@@ -247,7 +223,7 @@ fn create_frame() -> egui::Frame {
         .inner_margin(egui::Margin::same(1));
 }
 
-// App UI description
+/// App UI description
 impl eframe::App for MyEguiApp {
     // Main function, displaying the app elements
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
@@ -350,7 +326,7 @@ impl eframe::App for MyEguiApp {
                                     );
                                 }
 
-                                let button3 = create_button("Play with changed speed :");
+                                let button3 = create_button("Play with changed speed");
                                 if columns[0]
                                     .add_sized(
                                         Vec2::new(self.button_width, self.button_height),
@@ -373,7 +349,7 @@ impl eframe::App for MyEguiApp {
                                     });
                                 });
 
-                                let button4 = create_button("Play with reverb :");
+                                let button4 = create_button("Play with reverb");
 
                                 if columns[0]
                                     .add_sized(
@@ -420,7 +396,7 @@ impl eframe::App for MyEguiApp {
                                     play_with_pass(&mut signal_processor, FilterMode::HighPass);
                                 }
 
-                                let button7 = create_button("Play with delay :");
+                                let button7 = create_button("Play with delay");
                                 if columns[0]
                                     .add_sized(
                                         Vec2::new(self.button_width, self.button_height),

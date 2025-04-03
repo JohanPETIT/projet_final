@@ -1,0 +1,69 @@
+Projet Rust : Signal processing toolbox
+
+Objectifs de départ du projet : 
+- Réaliser une interface permettant d'essayer des effets audio.
+- Pouvoir choisir son propre fichier audio sur lequel appliquer les transformations
+- Pouvoir télécharger son fichier audio transformé
+
+Etapes du projet :
+
+1. Lancement de l'application egui
+J'ai créé une structure MyEGuiApp qui comprend les valeurs de base des effets audio. Elle est contenue dans une fenêtre eframe qui est exécutée par la fonction run_native(). Les options du frame sont définies par défaut.
+Notre structure MyEguiApp implémente le trait App, on doit donc ajouter la fonction update(), qui comprend les éléments de la page.
+
+2. Styles 
+On définit au début de update() le style par défaut de notre page : ici surtout les tailles/couleurs des polices ainsi que les espacements des objets.
+
+3. Premiers éléments
+Disposons à présent les premiers éléments de notre page. 
+Ajoutons un titre, un sous-titre, puis un bouton qui nous permettra de choisir le fichier à traiter.
+On utilise pour cela le type FileDialog, permettant d'ouvrir une interface afin de choisir notre fichier.
+On vérifie que celui-ci est bien d'extension mp3.
+J'aimerais également tester la taille/durée du fichier choisi, et empêcher l'utilisateur de choisir des fichiers trop lourds qui feraient ramer l'application.
+C'est là que j'ai rencontré mon premier (et plus gros) problème, puisque le FileDialog n'offre pas de test de taille du fichier.
+On peut donc tester la taille/durée du fichier qu'après que le FileDialog l'ait chargé. Ceci empêcherait alors d'utiliser les effets sur le fichier, enlevant la très grande majorité du lag de l'appli, mais il y'a toujours une partie où l'appli rame que je n'ai pas réussi à enlever.
+Ceci se situe lorsque le FileDialog charge le fichier : lorsque celui-ci est lourd/long, cela ajouter un temps de chargemenent important, que je n'ai jamais réussi à enlever malgré de nombreuses recherches de types alternatifs.
+
+
+4. Transformateur audio
+On crée l'objet SignalProcessor qui comporte un AudioManager, qui nous permettra de jouer des sons, ainsi que le fichier audio précédemment chargé.
+On initialise l'objet SignalProcessor lorsque l'utilisateur a choisi un fichier correspondant aux contraintes.
+L'AudioManager garde ses paramètres par défaut, et on charge le fichier audio dans un type StaticSoundData.
+
+5. Prochains éléments
+Une fois le fichier choisi et le SignalProcessor initialisé, on indique à l'utilisateur le chemin du fichier choisi. Puis, on affiche les boutons qui nous permettront d'appliquer les effets audio disponibles à notre son.
+On sépare l'interface en 2 colonnes de boutons.
+Puis, sachant que nous allons utiliser le même style pour tous les boutons, et que bouton n'implémente pas Clone ou Copy, on crée une fonction create_button() qui nous permettra d'initialiser un nouveau bouton avec le style défini dans la fonction.
+On ajoute un bouton pour chaque effet audio désiré.
+
+6. Fonctions de traitement audio
+On ajoute à présent les fonctions permettant d'exécuter les transformations audio sur notre son.
+Une multitude d'effets seraient possibles, on décide ici de se limiter à quelques uns pour ne pas surcharger l'utilisateur.
+Les voici : jouer le son normalement, le jouer avec de la distortion, le jouer en changeant graduellement la vitesse, le jouer avec plus ou moins de réverbération, le jouer en passe haut et bas, le jouer avec un délai qui relance le son tous les x secondes, et le jouer en coupant les fréquences désirées.
+On réalise les fonctions pour tous ces effets.
+Elles suivent toutes le principe suivant : On initialise le type d'effet souhaité, en modifiant les pramètres du type associé, puis on crée un TrackHandle qui permet d'ajouter l'effet à notre son. Enfin, on le joue.
+J'ai rencontré ici mon deuxième problème majeur et axe d'amélioration, lié à la structure du programme : 
+Notre programme re-éxécute la fonction update à chaque fois que l'utilisateur intéragit avec l'interface.
+Ainsi, lorsque l'on décide d'appuyer sur un bouton pour jouer un son, on recrée les objets et on écrase ceux existants.
+Ceci écrase donc notre objet SignalProcessor permettant de jouer les sons, et coupe ainsi l'exécution de notre son après un temps infime.
+Ceci m'a posé beaucoup de problèmes et de longues réflexions pour essayer d'échapper à cela.
+J'ai pu y trouver une solution, mais très barbare, qui DOIT être améliorée avec un peu plus de temps. 
+On teste si le son est toujours en train de jouer, on met en suspend l'exécution du programme.
+Cela fonctionne et crée une sorte d'illusion pour l'utilisateur qui est efficace pour les sons assez courts, mais cela empêche de toucher à n'importe quel élément de l'interface pendant qu'un son s'exécute, puisque le programme est en suspend.
+Ceci ne forme pas une solution durable et sécurisée, j'aimerais donc l'améliorer dans le futur mais elle fonctionne pour le moment.
+
+7. Personnalisation par l'utilisateur
+Pour certains effets comme le changement de vitesse, le délai, la fréquence de coupure..., on aimerait que l'utilisateur puisse choisir une valeur numérique afin de moduler l'intensité de l'effet.
+J'ai également ici rencontrés quelques problèmes, ne sachant pas vraiment comment je voulais que l'utilisateur pour choisir cette valeur : entrée numérique, slider ?
+J'ai finalement opté pour un slider, qui permet également d'entrer numériquement la valeur souhaitée.
+Le type de base ne permettant pas de modifier son style, j'ai dû l'imbriquer dans un Frame dont on définit le style dans la fonction create_frame(), similaire à create_button().
+Ce slider/frame crée un léger décalage par rapport à l'alignement des éléments de la colonne de gauche, que je n'ai pas encore réglé car c'est la toute dernière chose que j'ai implémenté ici.
+Mais cela semble être un problème plus léger et plus facilement réglable que les deux précédents. 
+
+Améliorations futures :
+- Régler les problèmes détaillés ci-dessus
+- Implémenter la possibilité de télécharger les sons modifiés, qui n'a pas été réalisée ici par manque de temps
+- Travailler sur la responsivité de l'interface
+
+
+
